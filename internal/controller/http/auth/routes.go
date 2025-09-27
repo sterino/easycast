@@ -3,17 +3,13 @@ package auth
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
-
-	controller "easycart/internal/controller/http"
 )
 
-func NewRoutes(h *AuthController) http.Handler {
+func NewRoutes(con *AuthController) http.Handler {
 	router := echo.New()
-	v1 := router.Group("/v1")
-	v1.POST("/auth/register", h.)
-	v1.POST("/auth/login", h.)
-	v1.POST("/auth/register/verify", h.)
-
+	router.POST("/auth/register", con.Register)
+	router.POST("/auth/login", con.Login)
+	//router.POST("/auth/register/verify", h.)
 
 	return router
 }

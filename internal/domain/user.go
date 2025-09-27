@@ -11,8 +11,9 @@ type User struct {
 	Avatar        string
 	PhoneNumber   string
 	PhoneVerified bool
-
-	Password string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Password      string
 }
 
 type AuthUser struct {

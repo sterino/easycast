@@ -1,14 +1,12 @@
 package migrations
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/doug-martin/goqu/v9"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/lib/pq"
 )
@@ -18,7 +16,14 @@ func NewSQLDB(config *Config) (*sql.DB, error) {
 	if config == nil {
 		return nil, errors.New("missing config")
 	}
-	dsn := config.DSN()
+	dsn := fmt.Sprintf(
+		"user=%s password=%s host=%s port=%s dbname=%s",
+		config.User,
+		config.Password,
+		config.Host,
+		config.Port,
+		config.DBName,
+	)
 	if config.SSLMode == "" {
 		dsn += " sslmode=disable"
 	} else {
@@ -63,27 +68,7 @@ func NewSQLDB(config *Config) (*sql.DB, error) {
 	return sqlDB, nil
 }
 
-func Dial(ctx context.Context, url string) (*pgxpool.Pool, error) {
-	conf, cfgErr := pgxpool.ParseConfig(url)
-
-	if cfgErr != nil {
-		return nil, cfgErr
-	}
-	conf.MaxConns = 20
-	conf.MinConns = 10
-	conf.MaxConnIdleTime = 10 * time.Second
-
-	conn, connErr := pgxpool.ConnectConfig(ctx, conf)
-
-	if connErr != nil {
-		return nil, connErr
-	}
-	if pingErr := conn.Ping(ctx); pingErr != nil {
-		return nil, pingErr
-	}
-	return conn, nil
-}
-
+// NewGoquDB returns raw goqu.Database entity.
 func NewGoquDB(config *Config) (*goqu.Database, error) {
 	sqlDB, err := NewSQLDB(config)
 	if err != nil {

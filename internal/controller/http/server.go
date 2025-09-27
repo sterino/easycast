@@ -12,17 +12,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
-// @title           EasyCart API
-// @version         0.0.1
-// @description     EasyCart API.
-//
-//	@contact.name	- Aibatyr Khassenov
-//	@contact.email	enovaib0@gmail.com
-//
-// @BasePath  /api
-//
-// ..
-func NewServer(cfg *Config, authRouter http.Handler) *http.Server {
+func NewServer(cfg *Config, authRouter http.Handler, userRouter http.Handler) *http.Server {
 	mux := http.NewServeMux()
 
 	router := echo.New()
@@ -32,7 +22,8 @@ func NewServer(cfg *Config, authRouter http.Handler) *http.Server {
 	mux.Handle("/", http.StripPrefix("/api", CORS(router)))
 	mux.Handle("/swagger/", httpSwagger.Handler(httpSwagger.URL("/swagger/doc.json")))
 	mux.Handle("/health-check/", CORS(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) })))
-	mux.Handle("/api/auth", http.StripPrefix("/api", CORS(authRouter)))
+	mux.Handle("/api/auth", http.StripPrefix("/api/auth", CORS(authRouter)))
+	mux.Handle("/api/user", http.StripPrefix("/api/user", CORS(userRouter)))
 
 	return &http.Server{
 		Addr:              fmt.Sprintf("0.0.0.0:%d", cfg.Port),
